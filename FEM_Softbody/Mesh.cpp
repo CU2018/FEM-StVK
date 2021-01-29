@@ -15,7 +15,7 @@ bool TetMesh::init(std::string fileName)
 
 		return false;
 	}
-
+	this->totalMass = 4.0f;
 	generateParticleList();
 	return true;
 }
@@ -49,8 +49,8 @@ void TetMesh::generateParticleList()
 {
 	verticesNum = loadedMesh->verticesList.size();
 	systemDimension = verticesNum * 3;
-	// ScalarType unitMass = totalMass / systemDimension;
-	ScalarType unitMass = 0.05f;
+	ScalarType unitMass = totalMass / systemDimension;
+	// ScalarType unitMass = 0.05f;
 
 	// Assign initial position, velocity and mass to all the vertices.
 	restposePos.resize(systemDimension);

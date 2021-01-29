@@ -42,8 +42,8 @@ int main()
 	gMesh->init(filePath);  // load the mesh info from the file
 	gFEMSimObj = new FEMSimObj();
 	// init FEMSimObj: pass in necessary variables
-	gFEMSimObj->init(gMesh, timeStep, gravityConst, dampingCoef, restitutionCoef, frictionCoef, 
-					lsAlpha, lsBeta, iterationNum, maxSubstep);
+	gFEMSimObj->init(gMesh, timeStep, gravityConst, dampingCoef, restitutionCoef, frictionCoef,
+		lsAlpha, lsBeta, iterationNum, maxSubstep);
 
 	for (int frameNum = 1; frameNum <= maxFrames; ++frameNum)
 	{

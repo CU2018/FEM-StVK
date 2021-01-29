@@ -9,10 +9,11 @@ bool planeIntersectionTest(const EigenVector3& p, EigenVector3& normal, ScalarTy
 	dist = p(1) - height - COLLISION_EPSILON;
 	normal = EigenVector3(0.0f, 1.0f, 0.0f);  // facing up
 
-	if (dist < 0)
+	/*if (dist < 0)
 		return true;
 	else
-		return false;
+		return false;*/
+	return dist < 0 ? true : false;
 }
 
 FEMSimObj::FEMSimObj()
@@ -61,6 +62,13 @@ void FEMSimObj::update()
 		// damping
 		dampVelocity();
 	}
+	/*
+	for (int i = 0; i < 12; ++i)
+	{
+		printf(" %f", mesh->currPos[i]);
+	
+	}
+	printf("\n");*/
 }
 
 
@@ -85,7 +93,7 @@ void FEMSimObj::clearConstraints()
 
 void FEMSimObj::setupConstraints()
 {
-	clearConstraints();
+	if(constraintsList.size() != 0) clearConstraints();
 	
 	stiffnessHigh = 1e5;
 
@@ -102,8 +110,7 @@ void FEMSimObj::setupConstraints()
 	for (unsigned int i = 0; i < tetMesh->loadedMesh->tetsList.size(); ++i)
 	{
 		MeshLoader::Tet& tet = tetMesh->loadedMesh->tetsList[i];
-		TetConstraint *tc;
-		tc = new TetConstraint(tet.id1, tet.id2, tet.id3, tet.id4, pos);
+		TetConstraint *tc = new TetConstraint(tet.id1, tet.id2, tet.id3, tet.id4, pos);
 		constraintsList.push_back(tc);
 
 		// totalVolume += tc->setMassMatrix(massTriplets, mass1dTriplets);
@@ -161,7 +168,8 @@ void FEMSimObj::dampVelocity()
 {
 	if (std::abs(dampingCoef) < EPSILON)
 		return;
-	mesh->currVel *= 1 - dampingCoef;
+	// mesh->currVel *= (1 - dampingCoef);
+	mesh->currVel *= pow((1 - dampingCoef), h);
 }
 
 void FEMSimObj::calculateExternalForce()
@@ -173,7 +181,9 @@ void FEMSimObj::calculateExternalForce()
 	{
 		externalForce[3 * i + 1] += -gravityConst; // y value of a vec3f
 	}
+	// std::cout << mesh->massMat << std::endl;
 	externalForce = mesh->massMat * externalForce;
+	// std::cout << externalForce << std::endl;
 }
 
 VectorX FEMSimObj::collisionDetectionPostProcessing(const VectorX& pos)
@@ -198,7 +208,7 @@ VectorX FEMSimObj::collisionDetectionPostProcessing(const VectorX& pos)
 
 void FEMSimObj::collisionDectection(const VectorX& pos)
 {
-	collisionConstrList.clear();
+	if(collisionConstrList.size() != 0 ) collisionConstrList.clear();
 	EigenVector3 surfacePoint;
 	EigenVector3 normal;
 	ScalarType dist;
@@ -209,7 +219,8 @@ void FEMSimObj::collisionDectection(const VectorX& pos)
 
 		if (planeIntersectionTest(onePos, normal, dist))
 		{
-			surfacePoint = onePos - normal * dist; // dist is negative...
+			// surfacePoint = onePos - normal * dist; // dist is negative...
+			surfacePoint = EigenVector3(onePos(0), 0.0f, onePos(2));
 			printf("collided with the floor! surface point: %f\n", surfacePoint[1]);
 			collisionConstrList.push_back(CollisionSpringConstraint(1e3, i, surfacePoint, normal));
 		}
@@ -310,10 +321,11 @@ void FEMSimObj::updatePosAndVel(const VectorX& newPos)
 	mesh->prevPos = mesh->currPos;
 	mesh->currVel = (newPos - mesh->currPos) / h;
 	mesh->currPos = newPos;
-	for (int i = 0; i < 12; ++i)
+	/*for (int i = 0; i < 12; ++i)
 	{
 		printf(" %f", mesh->currPos[i]);
-	}
+		printf("\n");
+	}*/
 }
 
 ScalarType FEMSimObj::evalEnergy(const VectorX& pos)

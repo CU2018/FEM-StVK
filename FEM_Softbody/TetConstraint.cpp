@@ -268,7 +268,7 @@ ScalarType TetConstraint::getStressTensorAndEnergyDensity(EigenMatrix3& P, const
 ScalarType TetConstraint::setMassMatrix(std::vector<SparseMatrixTriplet>& massMat)
 {
 	ScalarType wInv = 1.0 / w;
-	for (unsigned i = 0; i != 4; i++)
+	for (unsigned i = 0; i != 4; ++i)
 	{
 		// mass
 		massMat.push_back(SparseMatrixTriplet(3 * indicesList[i], 3 * indicesList[i], 0.25*w));
