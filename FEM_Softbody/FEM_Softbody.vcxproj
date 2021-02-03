@@ -134,7 +134,6 @@
     <ClCompile Include="MathHeaders.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshLoader.cpp" />
-    <ClCompile Include="Plane.cpp" />
     <ClCompile Include="TetConstraint.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -143,7 +142,6 @@
     <ClInclude Include="MathHeaders.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshLoader.h" />
-    <ClInclude Include="Plane.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="test.txt" />

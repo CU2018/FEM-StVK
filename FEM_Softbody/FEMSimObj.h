@@ -17,6 +17,7 @@ public:
 		ScalarType restitutionCoef, ScalarType frictionCoef,
 		ScalarType lsAlpha,	ScalarType lsBeta,
 		unsigned int iterationNum, unsigned int maxSubstep);
+	void initMatInfo(MaterialType matType, ScalarType matMu, ScalarType matLambda);
 	void update();
 	bool saveTetAsHDA(int frameNum);
 	bool saveGradientAsOBJ();
@@ -28,19 +29,15 @@ protected:
 	ScalarType dampingCoef;  // damping coefficient
 	ScalarType restitutionCoef;  // restituation coefficent
 	ScalarType frictionCoef;  // friction coefficient
-	ScalarType stiffnessStretch;
-	ScalarType stiffnessHigh;
-	ScalarType stiffnessBending;
-	ScalarType stiffnessKappa;
+	// material property
+	MaterialType matType;
+	ScalarType matMu;
+	ScalarType matLambda;
 
 	TetMesh *mesh; // main object
 
 	// constant term in optimization
 	VectorX y;
-
-	//// volume
-	//ScalarType currVolume;
-	//ScalarType restposeVolume;
 
 	// external force
 	VectorX externalForce;
@@ -58,7 +55,7 @@ protected:
 	std::vector<Constraint*> constraintsList;
 
 	// collision constraints
-	std::vector<CollisionSpringConstraint> collisionConstrList;
+	std::vector<CollisionConstraint> collisionConstrList;
 
 	// hard coded collision plane for demo
 	bool processCollision;
@@ -100,6 +97,12 @@ private:
 
 	// line search
 	ScalarType lineSearch(const VectorX& pos, const VectorX& gradient, const VectorX& descentDir);
+
+	// check the correctness of the gradient
+	void checkGradient(VectorX& pos, VectorX& gradient); 
+
+	// pre allocate
+	VectorX predPos;
 };
 
 #endif

@@ -1,4 +1,4 @@
-
+// MeshLoader: loaded vertices and tet info from files
 #ifndef _MESH_LOADER_H_
 #define _MESH_LOADER_H_
 
@@ -15,11 +15,10 @@ public:
 		unsigned int id1, id2, id3, id4;  // four vertices that construct one tet
 		Tet() {}
 		Tet(int a, int b, int c, int d) : id1(a), id2(b), id3(c), id4(d) {}
-		void idMinusMinus() { id1--; id2--; id3--; id4--; }
 	};
 
 	MeshLoader();
-	MeshLoader(std::string filename);
+	MeshLoader(std::string filename);   // initialize the mesh with a tet file
 	virtual ~MeshLoader();
 
 	inline bool info() { return loadSuccess; }

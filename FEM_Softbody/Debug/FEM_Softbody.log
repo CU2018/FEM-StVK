@@ -1,10 +1,12 @@
 ﻿  FEMSimObj.cpp
 c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\packages\eigen.3.3.3\build\native\include\eigen\src\core\arch\cuda\half.h : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
 c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(9): warning C4244: '=': conversion from 'double' to 'ScalarType', possible loss of data
-c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(113): warning C4316: 'TetConstraint': object allocated on the heap may not be aligned 16
-c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(138): warning C4244: '=': conversion from 'double' to 'ScalarType', possible loss of data
-c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(142): warning C4305: '=': truncation from 'double' to 'float'
-c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(143): warning C4305: '=': truncation from 'double' to 'ScalarType'
-c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(417): warning C4244: 'initializing': conversion from 'double' to 'ScalarType', possible loss of data
-c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(434): warning C4305: '=': truncation from 'double' to 'ScalarType'
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(136): warning C4244: '=': conversion from 'double' to 'ScalarType', possible loss of data
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(140): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(141): warning C4305: '=': truncation from 'double' to 'ScalarType'
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(299): warning C4244: 'initializing': conversion from 'double' to 'ScalarType', possible loss of data
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(304): warning C4244: 'initializing': conversion from 'double' to 'ScalarType', possible loss of data
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(308): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(445): warning C4244: 'initializing': conversion from 'double' to 'ScalarType', possible loss of data
+c:\users\administrator\desktop\simulation rd\3_fem\fem_softbody\fem_softbody\femsimobj.cpp(462): warning C4305: '=': truncation from 'double' to 'ScalarType'
   FEM_Softbody.vcxproj -> C:\Users\Administrator\Desktop\Simulation RD\3_FEM\FEM_Softbody\Debug\FEM_Softbody.exe

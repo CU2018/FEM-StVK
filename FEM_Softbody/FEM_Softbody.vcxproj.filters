@@ -25,9 +25,6 @@
     <Filter Include="Source Files\Math">
       <UniqueIdentifier>{84b65e0e-6e59-4bf5-8363-fe9bedf23787}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Plane">
-      <UniqueIdentifier>{2cd1a8d5-811d-4a01-976f-817048d689ab}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -55,9 +52,6 @@
     <ClCompile Include="TetConstraint.cpp">
       <Filter>Source Files\Constraint</Filter>
     </ClCompile>
-    <ClCompile Include="Plane.cpp">
-      <Filter>Source Files\Plane</Filter>
-    </ClCompile>
     <ClCompile Include="CollisionConstraint.cpp">
       <Filter>Source Files\Constraint</Filter>
     </ClCompile>
@@ -77,9 +71,6 @@
     </ClInclude>
     <ClInclude Include="Constraint.h">
       <Filter>Source Files\Constraint</Filter>
-    </ClInclude>
-    <ClInclude Include="Plane.h">
-      <Filter>Source Files\Plane</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

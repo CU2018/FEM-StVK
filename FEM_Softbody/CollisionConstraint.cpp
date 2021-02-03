@@ -1,6 +1,6 @@
 #include "Constraint.h"
 
-CollisionSpringConstraint::CollisionSpringConstraint(unsigned int p0, const EigenVector3& fixedPoint, const EigenVector3& normal) :
+CollisionConstraint::CollisionConstraint(unsigned int p0, const EigenVector3& fixedPoint, const EigenVector3& normal) :
 	Constraint(CONSTRAINT_TYPE_COLLISION),
 	p0(p0),
 	fixedPoint(fixedPoint),
@@ -9,7 +9,7 @@ CollisionSpringConstraint::CollisionSpringConstraint(unsigned int p0, const Eige
 
 }
 
-CollisionSpringConstraint::CollisionSpringConstraint(ScalarType stiffness, unsigned int p0, const EigenVector3& fixedPoint, const EigenVector3& normal) :
+CollisionConstraint::CollisionConstraint(ScalarType stiffness, unsigned int p0, const EigenVector3& fixedPoint, const EigenVector3& normal) :
 	Constraint(CONSTRAINT_TYPE_COLLISION, stiffness),
 	p0(p0),
 	fixedPoint(fixedPoint),
@@ -18,7 +18,7 @@ CollisionSpringConstraint::CollisionSpringConstraint(ScalarType stiffness, unsig
 
 }
 
-CollisionSpringConstraint::CollisionSpringConstraint(const CollisionSpringConstraint& other) :
+CollisionConstraint::CollisionConstraint(const CollisionConstraint& other) :
 	Constraint(other),
 	p0(other.p0),
 	fixedPoint(other.fixedPoint),
@@ -27,12 +27,12 @@ CollisionSpringConstraint::CollisionSpringConstraint(const CollisionSpringConstr
 
 }
 
-CollisionSpringConstraint::~CollisionSpringConstraint()
+CollisionConstraint::~CollisionConstraint()
 {
 
 }
 
-bool CollisionSpringConstraint::isActive(const VectorX& pos)
+bool CollisionConstraint::isActive(const VectorX& pos)
 {
 	EigenVector3 pos0 = pos.block_vector(p0);  // position of p0
 
@@ -43,7 +43,7 @@ bool CollisionSpringConstraint::isActive(const VectorX& pos)
 }
 
 // 0.5*k*(current_length)^2
-ScalarType CollisionSpringConstraint::evalEnergy(const VectorX& pos)
+ScalarType CollisionConstraint::evalEnergy(const VectorX& pos)
 {
 	if (isActive(pos))
 	{
@@ -58,12 +58,12 @@ ScalarType CollisionSpringConstraint::evalEnergy(const VectorX& pos)
 	}
 }
 
-ScalarType CollisionSpringConstraint::getEnergy()
+ScalarType CollisionConstraint::getEnergy()
 {
 	return energy;
 }
 
-void CollisionSpringConstraint::evalGradient(const VectorX& pos, VectorX& gradient)
+void CollisionConstraint::evalGradient(const VectorX& pos, VectorX& gradient)
 {
 	if (isActive(pos))
 	{
@@ -72,50 +72,38 @@ void CollisionSpringConstraint::evalGradient(const VectorX& pos, VectorX& gradie
 	}
 }
 
-void CollisionSpringConstraint::evalGradient(const VectorX& pos)
-{
-	if (isActive(pos))
-	{
-		constrGradient = (constrStiffness)*(pos.block_vector(p0) - fixedPoint);
-	}
-	else
-	{
-		constrGradient.setZero();
-	}
-}
-
-void CollisionSpringConstraint::getGradient(VectorX& gradient)
+void CollisionConstraint::getGradient(VectorX& gradient)
 {
 	gradient.block_vector(p0) += constrGradient;
 }
-
-ScalarType CollisionSpringConstraint::evalEnergyAndGradient(const VectorX& pos, VectorX& gradient)
-{
-	evalEnergyAndGradient(pos);
-	gradient.block_vector(p0) += constrGradient;
-
-	return energy;
-}
-
-ScalarType CollisionSpringConstraint::evalEnergyAndGradient(const VectorX& pos)
-{
-	if (isActive(pos))
-	{
-		// energy
-		energy = 0.5*(constrStiffness)*(pos.block_vector(p0) - fixedPoint).squaredNorm();
-		// gradient
-		constrGradient = (constrStiffness)*(pos.block_vector(p0) - fixedPoint);
-	}
-	else
-	{
-		energy = 0;
-		constrGradient.setZero();
-	}
-
-	return energy;
-}
-ScalarType CollisionSpringConstraint::getEnergyAndGradient(VectorX& gradient)
-{
-	gradient.block_vector(p0) += constrGradient;
-	return energy;
-}
+//
+//ScalarType CollisionConstraint::evalEnergyAndGradient(const VectorX& pos, VectorX& gradient)
+//{
+//	evalEnergyAndGradient(pos);
+//	gradient.block_vector(p0) += constrGradient;
+//
+//	return energy;
+//}
+//
+//ScalarType CollisionConstraint::evalEnergyAndGradient(const VectorX& pos)
+//{
+//	if (isActive(pos))
+//	{
+//		// energy
+//		energy = 0.5*(constrStiffness)*(pos.block_vector(p0) - fixedPoint).squaredNorm();
+//		// gradient
+//		constrGradient = (constrStiffness)*(pos.block_vector(p0) - fixedPoint);
+//	}
+//	else
+//	{
+//		energy = 0;
+//		constrGradient.setZero();
+//	}
+//
+//	return energy;
+//}
+//ScalarType CollisionConstraint::getEnergyAndGradient(VectorX& gradient)
+//{
+//	gradient.block_vector(p0) += constrGradient;
+//	return energy;
+//}
