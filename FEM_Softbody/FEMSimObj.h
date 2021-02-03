@@ -29,10 +29,11 @@ protected:
 	ScalarType dampingCoef;  // damping coefficient
 	ScalarType restitutionCoef;  // restituation coefficent
 	ScalarType frictionCoef;  // friction coefficient
+
 	// material property
 	MaterialType matType;
-	ScalarType matMu;
-	ScalarType matLambda;
+	ScalarType matMu;   // stretch
+	ScalarType matLambda;  // bending
 
 	TetMesh *mesh; // main object
 
@@ -100,6 +101,7 @@ private:
 
 	// check the correctness of the gradient
 	void checkGradient(VectorX& pos, VectorX& gradient); 
+	void divideTwoGradients(VectorX& g1, VectorX& g2);
 
 	// pre allocate
 	VectorX predPos;

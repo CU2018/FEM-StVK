@@ -12,6 +12,7 @@ bool TetMesh::init(std::string fileName)
 	}
 	// this->totalMass = 4.0f;
 	generateParticleList();
+	// generateEdgeList();
 	return true;
 }
 
@@ -87,85 +88,85 @@ void TetMesh::generateParticleList()
 	printf("Generate particle list done!\n");
 }
 
-//void TetMesh::generateEdgeList()
-//{
-//	SparseMatrix edgeMatrix(verticesNum, verticesNum);
-//	edgeMatrix.setZero();
-//
-//	unsigned int i1, i2;
-//	for (std::vector<MeshLoader::Tet>::iterator iter = loadedMesh->tetsList.begin(); iter != loadedMesh->tetsList.end(); ++iter)
-//	{
-//		// 1-2
-//		i1 = iter->id1;
-//		i2 = iter->id2;
-//		if (edgeMatrix.coeff(i1, i2) < EPSILON)
-//		{
-//			edgeMatrix.coeffRef(i1, i2) = 1;
-//			edgeMatrix.coeffRef(i2, i1) = 1;
-//			Edge newEdge;
-//			newEdge.v1 = i1;
-//			newEdge.v2 = i2;
-//			edgesList.push_back(newEdge);
-//		}
-//		// 1-3
-//		i1 = iter->id1;
-//		i2 = iter->id3;
-//		if (edgeMatrix.coeff(i1, i2) < EPSILON)
-//		{
-//			edgeMatrix.coeffRef(i1, i2) = 1;
-//			edgeMatrix.coeffRef(i2, i1) = 1;
-//			Edge newEdge;
-//			newEdge.v1 = i1;
-//			newEdge.v2 = i2;
-//			edgesList.push_back(newEdge);
-//		}
-//		// 1-4
-//		i1 = iter->id1;
-//		i2 = iter->id4;
-//		if (edgeMatrix.coeff(i1, i2) < EPSILON)
-//		{
-//			edgeMatrix.coeffRef(i1, i2) = 1;
-//			edgeMatrix.coeffRef(i2, i1) = 1;
-//			Edge newEdge;
-//			newEdge.v1 = i1;
-//			newEdge.v2 = i2;
-//			edgesList.push_back(newEdge);
-//		}
-//		// 2-3
-//		i1 = iter->id2;
-//		i2 = iter->id3;
-//		if (edgeMatrix.coeff(i1, i2) < EPSILON)
-//		{	
-//			edgeMatrix.coeffRef(i1, i2) = 1;
-//			edgeMatrix.coeffRef(i2, i1) = 1;
-//			Edge newEdge;
-//			newEdge.v1 = i1;
-//			newEdge.v2 = i2;
-//			edgesList.push_back(newEdge);
-//		}
-//		// 2-4
-//		i1 = iter->id2;
-//		i2 = iter->id4;
-//		if (edgeMatrix.coeff(i1, i2) < EPSILON)
-//		{	
-//			edgeMatrix.coeffRef(i1, i2) = 1;
-//			edgeMatrix.coeffRef(i2, i1) = 1;
-//			Edge newEdge;
-//			newEdge.v1 = i1;
-//			newEdge.v2 = i2;
-//			edgesList.push_back(newEdge);
-//		}
-//		// 3-4
-//		i1 = iter->id3;
-//		i2 = iter->id4;
-//		if (edgeMatrix.coeff(i1, i2) < EPSILON)
-//		{	
-//			edgeMatrix.coeffRef(i1, i2) = 1;
-//			edgeMatrix.coeffRef(i2, i1) = 1;
-//			Edge newEdge;
-//			newEdge.v1 = i1;
-//			newEdge.v2 = i2;
-//			edgesList.push_back(newEdge);
-//		}
-//	}
-//}
+void TetMesh::generateEdgeList()
+{
+	SparseMatrix edgeMatrix(verticesNum, verticesNum);
+	edgeMatrix.setZero();
+
+	unsigned int i1, i2;
+	for (std::vector<MeshLoader::Tet>::iterator iter = loadedMesh->tetsList.begin(); iter != loadedMesh->tetsList.end(); ++iter)
+	{
+		// 1-2
+		i1 = iter->id1;
+		i2 = iter->id2;
+		if (edgeMatrix.coeff(i1, i2) < EPSILON)
+		{
+			edgeMatrix.coeffRef(i1, i2) = 1;
+			edgeMatrix.coeffRef(i2, i1) = 1;
+			Edge newEdge;
+			newEdge.v1 = i1;
+			newEdge.v2 = i2;
+			edgesList.push_back(newEdge);
+		}
+		// 1-3
+		i1 = iter->id1;
+		i2 = iter->id3;
+		if (edgeMatrix.coeff(i1, i2) < EPSILON)
+		{
+			edgeMatrix.coeffRef(i1, i2) = 1;
+			edgeMatrix.coeffRef(i2, i1) = 1;
+			Edge newEdge;
+			newEdge.v1 = i1;
+			newEdge.v2 = i2;
+			edgesList.push_back(newEdge);
+		}
+		// 1-4
+		i1 = iter->id1;
+		i2 = iter->id4;
+		if (edgeMatrix.coeff(i1, i2) < EPSILON)
+		{
+			edgeMatrix.coeffRef(i1, i2) = 1;
+			edgeMatrix.coeffRef(i2, i1) = 1;
+			Edge newEdge;
+			newEdge.v1 = i1;
+			newEdge.v2 = i2;
+			edgesList.push_back(newEdge);
+		}
+		// 2-3
+		i1 = iter->id2;
+		i2 = iter->id3;
+		if (edgeMatrix.coeff(i1, i2) < EPSILON)
+		{	
+			edgeMatrix.coeffRef(i1, i2) = 1;
+			edgeMatrix.coeffRef(i2, i1) = 1;
+			Edge newEdge;
+			newEdge.v1 = i1;
+			newEdge.v2 = i2;
+			edgesList.push_back(newEdge);
+		}
+		// 2-4
+		i1 = iter->id2;
+		i2 = iter->id4;
+		if (edgeMatrix.coeff(i1, i2) < EPSILON)
+		{	
+			edgeMatrix.coeffRef(i1, i2) = 1;
+			edgeMatrix.coeffRef(i2, i1) = 1;
+			Edge newEdge;
+			newEdge.v1 = i1;
+			newEdge.v2 = i2;
+			edgesList.push_back(newEdge);
+		}
+		// 3-4
+		i1 = iter->id3;
+		i2 = iter->id4;
+		if (edgeMatrix.coeff(i1, i2) < EPSILON)
+		{	
+			edgeMatrix.coeffRef(i1, i2) = 1;
+			edgeMatrix.coeffRef(i2, i1) = 1;
+			Edge newEdge;
+			newEdge.v1 = i1;
+			newEdge.v2 = i2;
+			edgesList.push_back(newEdge);
+		}
+	}
+}

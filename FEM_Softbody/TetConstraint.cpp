@@ -26,7 +26,7 @@ TetConstraint::TetConstraint(unsigned int p1, unsigned int p2, unsigned int p3, 
 
 	w = Dm.determinant();
 
-	w = 1.0 / 6.0 * std::abs(w);  // ???????????
+	w = 1.0 / 6.0 * std::abs(w); 
 
 	DmInv = Dm.inverse();
 }

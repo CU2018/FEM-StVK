@@ -19,6 +19,7 @@ int gdIteration = 500;  // num of gradient descent iteration
 
 // init FEMSimObj
 float timeStep = 1.0f / (FPS*maxSubstep); //1.0/240f;
+// float timeStep = 1.0f / (FPS*maxSubstep);
 float dampingCoef = 0.9f;  // damping coefficient 0.9f
 float gravityConst = 9.8f;
 float restitutionCoef = 1.0f;

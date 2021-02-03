@@ -103,16 +103,15 @@ void FEMSimObj::clearConstraints()
 
 void FEMSimObj::setupConstraints()
 {
+	
 	if (constraintsList.size() != 0) clearConstraints();
 
-	// reset mass matrix for tet simulation:
+	// tet constraints
 	ScalarType totalVolume = 0;
 	std::vector<SparseMatrixTriplet> massTriplets;
 	massTriplets.clear();
-
 	VectorX& pos = mesh->currPos;
 	TetMesh* tetMesh = dynamic_cast<TetMesh*>(mesh);
-
 	for (unsigned int i = 0; i < tetMesh->loadedMesh->tetsList.size(); ++i)
 	{
 		MeshLoader::Tet& tet = tetMesh->loadedMesh->tetsList[i];
@@ -121,9 +120,9 @@ void FEMSimObj::setupConstraints()
 		constraintsList.push_back(tc);
 		totalVolume += tc->setMassMatrix(massTriplets);
 	}
-
+	// build point to primitive map
 	mesh->massMat.setFromTriplets(massTriplets.begin(), massTriplets.end());
-	// mesh->massMat = mesh->massMat * (mesh->totalMass / totalVolume);
+	mesh->massMat = mesh->massMat * (mesh->totalMass / totalVolume);
 
 	std::vector<SparseMatrixTriplet> massInvTriplets;
 	massInvTriplets.clear();
@@ -307,18 +306,30 @@ void FEMSimObj::checkGradient(VectorX& pos, VectorX& gradient)
 
 		smallShiftX(i) = (energyAdd - energySub) / (2 * COLLISION_EPSILON);
 	}
-	/*printf("Check Gradient:\n");
-	std::cout << smallShiftX << std::endl;*/
+	printf("Check Gradient:\n");
+	std::cout << smallShiftX << std::endl;
+	printf("Eval Gradient:\n");
+	std::cout << gradient << std::endl;
+	divideTwoGradients(smallShiftX, gradient);
+}
+
+void FEMSimObj::divideTwoGradients(VectorX& g1, VectorX& g2)
+{
+	assert(g1.size() == g2.size());
+	VectorX div(g1.size());
+	for (unsigned int i = 0; i < 12; ++i)
+	{
+		div(i) = g1(i) / g2(i);   // correct / real
+	}
+	printf("Divide Gradients:\n");
+	std::cout << div << std::endl;
 }
 
 bool FEMSimObj::performGradientDescentOneIter(VectorX& pos)
 {
 	// calcuate gradient direction
 	VectorX gradient;
-	// printf("Eval Gradient:\n");
 	evalGradient(pos, gradient);
-	// std::cout << gradient << std::endl;
-
 	checkGradient(pos ,gradient);
 	if (gradient.norm() < EPSILON)
 		return true;
@@ -373,7 +384,7 @@ ScalarType FEMSimObj::evalEnergy(const VectorX& pos)
 ScalarType FEMSimObj::evalEnergyPureConstraint(const VectorX& pos)
 {
 	ScalarType rtnEnergy = 0.0;
-	// tet constraints
+
 	for (std::vector<Constraint*>::iterator it = constraintsList.begin(); it != constraintsList.end(); ++it)
 	{
 		rtnEnergy += (*it)->evalEnergy(pos);
@@ -400,7 +411,6 @@ void FEMSimObj::evalGradientPureConstraint(const VectorX& pos, VectorX& gradient
 	gradient.resize(mesh->systemDimension);
 	gradient.setZero();
 
-	// tet contraints
 	for (std::vector<Constraint*>::iterator iter = constraintsList.begin(); iter != constraintsList.end(); ++iter)
 	{
 		(*iter)->evalGradient(pos, gradient);
