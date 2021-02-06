@@ -28,7 +28,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="oneTet\oneTetRest.tet" />
+    <None Include="oneTet\manyTets.tet">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="oneTet\oneTet.tet">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="oneTet\pigHead.tet">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

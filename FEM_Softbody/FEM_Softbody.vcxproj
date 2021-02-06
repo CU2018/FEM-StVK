@@ -123,7 +123,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="oneTet\oneTetRest.tet" />
+    <None Include="oneTet\manyTets.tet" />
+    <None Include="oneTet\oneTet.tet" />
+    <None Include="oneTet\pigHead.tet" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

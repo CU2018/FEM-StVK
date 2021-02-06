@@ -76,34 +76,3 @@ void CollisionConstraint::getGradient(VectorX& gradient)
 {
 	gradient.block_vector(p0) += constrGradient;
 }
-//
-//ScalarType CollisionConstraint::evalEnergyAndGradient(const VectorX& pos, VectorX& gradient)
-//{
-//	evalEnergyAndGradient(pos);
-//	gradient.block_vector(p0) += constrGradient;
-//
-//	return energy;
-//}
-//
-//ScalarType CollisionConstraint::evalEnergyAndGradient(const VectorX& pos)
-//{
-//	if (isActive(pos))
-//	{
-//		// energy
-//		energy = 0.5*(constrStiffness)*(pos.block_vector(p0) - fixedPoint).squaredNorm();
-//		// gradient
-//		constrGradient = (constrStiffness)*(pos.block_vector(p0) - fixedPoint);
-//	}
-//	else
-//	{
-//		energy = 0;
-//		constrGradient.setZero();
-//	}
-//
-//	return energy;
-//}
-//ScalarType CollisionConstraint::getEnergyAndGradient(VectorX& gradient)
-//{
-//	gradient.block_vector(p0) += constrGradient;
-//	return energy;
-//}

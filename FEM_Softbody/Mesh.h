@@ -13,12 +13,6 @@ typedef enum
 	MESH_TYPE_TOTAL_NUM
 } MeshType;
 
-struct Edge
-{
-	unsigned int v1, v2; // indices of endpoint vertices
-	unsigned int tri1, tri2; // indices of adjacent faces
-};
-
 class Mesh
 {
 	friend class FEMSimObj;
@@ -45,15 +39,11 @@ public:
 
 	// mass
 	ScalarType totalMass;
-
-	// for generating constraints.
-	std::vector<Edge> edgesList;
+	ScalarType unitMass;
 
 protected:
 	// initialize every particle pos / vel / mass / color.
 	virtual void generateParticleList() { std::cout << "Warning: reach base class virtual function." << std::endl; }
-	// generate edge list from the geometry representation.
-	virtual void generateEdgeList() { std::cout << "Warning: reach base class virtual function." << std::endl; }
 };
 
 
@@ -65,7 +55,7 @@ public:
 	TetMesh() : Mesh(MESH_TYPE_TET), loadedMesh(NULL) {}
 	virtual ~TetMesh() { if (loadedMesh) { delete loadedMesh; } }
 
-	virtual bool init(std::string fileName);
+	virtual bool init(std::string fileName, ScalarType unitMass);
 	bool exportToFile(int frameNum);
 
 protected:
@@ -75,7 +65,5 @@ protected:
 protected:
 	// initialize every particle pos / vel / mass / color.
 	virtual void generateParticleList();
-	// generate edge list from the geometry representation.
-	virtual void generateEdgeList();
 };
 #endif

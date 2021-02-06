@@ -33,11 +33,11 @@ MeshLoader::MeshLoader(std::string filename)
 			assert(dataStringList.size() % 3 == 0);
 			for (unsigned int i = 0; i < dataStringList.size(); i+=3)
 			{
-				std::cout << dataStringList[i] << std::endl;
+				// std::cout << dataStringList[i] << std::endl;
 				glm::vec3 vertexPos(std::stof(dataStringList[i]),
 									std::stof(dataStringList[i+1]),
 									std::stof(dataStringList[i+2]));
-				printf("vec %d: %f, %f, %f\n", i/3, vertexPos[0], vertexPos[1], vertexPos[2]);
+				// printf("vec %d: %f, %f, %f\n", i/3, vertexPos[0], vertexPos[1], vertexPos[2]);
 				verticesList.push_back(vertexPos);
 			}
 			assert(verticesList.size() == dataStringList.size() / 3);
@@ -47,10 +47,10 @@ MeshLoader::MeshLoader(std::string filename)
 			assert(dataStringList.size() % 4 == 0);
 			for (unsigned int i = 0; i < dataStringList.size(); i += 4)
 			{
-				std::cout << dataStringList[i] << std::endl;
+				// std::cout << dataStringList[i] << std::endl;
 				Tet newTet(std::stoi(dataStringList[i]), std::stoi(dataStringList[i + 1]),
 						std::stoi(dataStringList[i + 2]), std::stoi(dataStringList[i + 3]));
-				printf("tet %d: %d, %d, %d, %d\n", i/4, newTet.id1, newTet.id2, newTet.id3, newTet.id4);
+				// printf("tet %d: %d, %d, %d, %d\n", i/4, newTet.id1, newTet.id2, newTet.id3, newTet.id4);
 				tetsList.push_back(newTet);
 			}
 			assert(tetsList.size() == dataStringList.size() / 4);

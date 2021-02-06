@@ -12,19 +12,27 @@ public:
 	FEMSimObj();
 	virtual ~FEMSimObj();
 
-	void init(TetMesh* mesh, ScalarType h,
+	void init(TetMesh* mesh, ScalarType deltaTime,
 		ScalarType gravityConst, ScalarType dampingCoef, 
 		ScalarType restitutionCoef, ScalarType frictionCoef,
 		ScalarType lsAlpha,	ScalarType lsBeta,
 		unsigned int iterationNum, unsigned int maxSubstep);
 	void initMatInfo(MaterialType matType, ScalarType matMu, ScalarType matLambda);
+	void advect();
 	void update();
 	bool saveTetAsHDA(int frameNum);
 	bool saveGradientAsOBJ();
+	void setDebug(bool debug);
+
+	// static analysis
+	void adjustOnePoint();
+	void setPredMeshPos(TetMesh* predMesh);
+	bool isFirstFrame;
+	bool staticAnalysisLog;
 
 protected:
 	// simulation constants
-	ScalarType h;  // time Step
+	ScalarType deltaTime;  // delta time
 	ScalarType gravityConst;
 	ScalarType dampingCoef;  // damping coefficient
 	ScalarType restitutionCoef;  // restituation coefficent
@@ -60,6 +68,7 @@ protected:
 
 	// hard coded collision plane for demo
 	bool processCollision;
+	bool debug;
 
 private:
 	// update helper functions
@@ -67,9 +76,7 @@ private:
 	void setupConstraints();   // initialize tet constraints
 	void dampVelocity();  // damp velocity at the end of each iteration
 	void calculateExternalForce();  // gravity force ONLY
-	VectorX collisionDetectionPostProcessing(const VectorX& pos); // detect collision and return a vector of penetration
 	void collisionDectection(const VectorX& pos);
-	void collisionResolution(const VectorX& penetration, VectorX& pos, VectorX& currVel);
 	
 	void integrateImplicitProjection();  // implicit projection
 	
@@ -105,6 +112,11 @@ private:
 
 	// pre allocate
 	VectorX predPos;
+	VectorX lsNew;
+	ScalarType prevEnergy;
+	ScalarType newEnergy;
+
+	void logEnergyInfo();
 };
 
 #endif

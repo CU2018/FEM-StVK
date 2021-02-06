@@ -23,14 +23,14 @@ FEMSimObj::~FEMSimObj()
 }
 
 // TODO: pass in necessary variables and initialize them
-void FEMSimObj::init(TetMesh* mesh, ScalarType h,
+void FEMSimObj::init(TetMesh* mesh, ScalarType deltaTime,
 	ScalarType gravityConst, ScalarType dampingCoef,
 	ScalarType restitutionCoef, ScalarType frictionCoef,
 	ScalarType lsAlpha, ScalarType lsBeta,
 	unsigned int iterationNum, unsigned int maxSubstep)
 {
 	(this->mesh) = mesh;
-	this->h = h;
+	this->deltaTime = deltaTime;
 	this->gravityConst = gravityConst;
 	this->dampingCoef = dampingCoef;
 	this->restitutionCoef = restitutionCoef;
@@ -45,7 +45,7 @@ void FEMSimObj::init(TetMesh* mesh, ScalarType h,
 	collisionConstrList.clear();
 }
 
-void  FEMSimObj::initMatInfo(MaterialType matType, ScalarType matMu, ScalarType matKappa)
+void FEMSimObj::initMatInfo(MaterialType matType, ScalarType matMu, ScalarType matKappa)
 {
 	this->matType = matType;
 	this->matMu = matMu;
@@ -53,25 +53,50 @@ void  FEMSimObj::initMatInfo(MaterialType matType, ScalarType matMu, ScalarType 
 	setupConstraints();
 }
 
+void FEMSimObj::setPredMeshPos(TetMesh* predMesh)
+{
+	mesh->currPos = predMesh->currPos;
+}
+
+void FEMSimObj::advect()
+{
+	mesh->currPos += mesh->currVel * deltaTime;
+}
+
 void FEMSimObj::update()
 {
-	// compute external force
-	calculateExternalForce();
-
-	printf("---------------------------------------------\n");
-	for (unsigned int currSubstep = 0; currSubstep < maxSubstep; ++currSubstep)
+	externalForce.setZero();
+	if (!isFirstFrame)
 	{
-		// compute inertia term
-		computeConstantVectorY();
-		// perform gradient descent
-		integrateImplicitProjection();
+		// compute external force
+		calculateExternalForce();
+		//  externalForce.setZero();
+		advect();
+		// if(!isFirstFrame) adjustOnePoint();
+		printf("---------------------------------------------\n");
+		for (unsigned int currSubstep = 0; currSubstep < maxSubstep; ++currSubstep)
+		{
+			// compute inertia term
+			computeConstantVectorY();
+			// perform gradient descent
+			integrateImplicitProjection();
 		
-		// damping
-		dampVelocity();
+			// damping
+			dampVelocity();
+		}
+		if (this->debug)
+		{
+			printf("Frame CurrPos:\n ");
+			std::cout << mesh->currPos << std::endl;
+			printf("\n");
+		}
 	}
-	printf("Frame CurrPos:\n ");
-	std::cout << mesh->currPos << std::endl;
-	printf("\n");
+	
+	logEnergyInfo();
+}
+
+void FEMSimObj::logEnergyInfo()
+{
 	// output total energy;
 	ScalarType K = evalKineticEnergy(mesh->currVel);
 	ScalarType W = evalPotentialEnergy(mesh->currPos);
@@ -81,7 +106,6 @@ void FEMSimObj::update()
 	std::cout << "Total Energy = " << KPlusW << std::endl;
 }
 
-
 bool FEMSimObj::saveTetAsHDA(int frameNum)
 {
 	return mesh->exportToFile(frameNum);
@@ -90,6 +114,16 @@ bool FEMSimObj::saveTetAsHDA(int frameNum)
 bool FEMSimObj::saveGradientAsOBJ()
 {
 	return false;
+}
+
+void FEMSimObj::setDebug(bool debug)
+{
+	this->debug = debug;
+}
+
+void FEMSimObj::adjustOnePoint()
+{
+	mesh->currPos(1) = 1.6f;
 }
 
 void FEMSimObj::clearConstraints()
@@ -150,7 +184,7 @@ void FEMSimObj::dampVelocity()
 		return;
 	// mesh->currVel *= (1 - dampingCoef);
 
-	mesh->currVel *= pow((1 - dampingCoef), h);
+	mesh->currVel *= pow((1 - dampingCoef), deltaTime);
 }
 
 void FEMSimObj::calculateExternalForce()
@@ -164,26 +198,6 @@ void FEMSimObj::calculateExternalForce()
 	// std::cout << mesh->massMat << std::endl;
 	externalForce = mesh->massMat * externalForce;
 	// std::cout << externalForce << std::endl;
-}
-
-VectorX FEMSimObj::collisionDetectionPostProcessing(const VectorX& pos)
-{
-	VectorX penetration(mesh->systemDimension);
-	penetration.setZero();
-	EigenVector3 normal;
-	ScalarType dist;
-
-	for (unsigned int i = 0; i != mesh->verticesNum; ++i)
-	{
-		EigenVector3 onePos = pos.block_vector(i);
-
-		if (planeIntersectionTest(onePos, normal, dist))
-		{
-			penetration.block_vector(i) += (dist)* normal;
-		}
-	}
-	// std::cout << penetration << std::endl;
-	return penetration;
 }
 
 void FEMSimObj::collisionDectection(const VectorX& pos)
@@ -201,68 +215,7 @@ void FEMSimObj::collisionDectection(const VectorX& pos)
 			surfacePoint = EigenVector3(onePos(0), 0.0f, onePos(2));
 			collisionConstrList.push_back(CollisionConstraint(1e3, i, surfacePoint, normal));
 		}
-		//if (planeIntersectionTest(onePos, normal, dist))
-		//{
-		//	surfacePoint = onePos - normal * dist; // dist is negative...
-		//	// printf("collided with the floor! surface point: %f\n", surfacePoint[1]);
-		//	collisionConstrList.push_back(CollisionConstraint(1e3, i, surfacePoint, normal));
-		//}
 	}
-
-	VectorX penetration;
-	if (collisionConstrList.size() != 0)
-	{
-		penetration = collisionDetectionPostProcessing(pos);
-
-		// std::cout << penetration << std::endl;
-		collisionResolution(penetration, mesh->currPos, mesh->currVel);
-	}
-}
-
-void FEMSimObj::collisionResolution(const VectorX& penetration, VectorX& pos, VectorX& vel)
-{
-	//EigenVector3 currVPos, currVVel, currVPene, currVNorm;
-	//EigenVector3 velin, velit;
-	//for (unsigned int i = 0; i != mesh->verticesNum; ++i)
-	//{
-	//	currVPos = pos.block_vector(i);
-	//	currVVel = vel.block_vector(i);
-	//	currVPene = penetration.block_vector(i);
-
-	//	ScalarType dist = currVPene.norm();
-	//	if (dist > EPSILON) // there is collision
-	//	{
-	//		currVNorm = -currVPene / dist; // normalize
-	//		currVPos -= currVPene;
-	//		velin = currVVel.dot(currVNorm)*currVNorm;
-	//		velit = currVVel - velin;
-	//		currVVel = -(restitutionCoef) * velin + (1 - frictionCoef) * velit;
-	//		pos.block_vector(i) = currVPos;
-	//		vel.block_vector(i) = currVVel;
-	//	}
-	//}
-	EigenVector3 xi, vi, pi, ni;
-	EigenVector3 vin, vit;
-	for (unsigned int i = 0; i != mesh->verticesNum; ++i)
-	{
-		xi = pos.block_vector(i);
-		vi = vel.block_vector(i);
-		pi = penetration.block_vector(i);
-
-		ScalarType dist = pi.norm();
-		if (dist > EPSILON) // there is collision
-		{
-			ni = -pi / dist; // normalize
-			xi -= pi;
-			vin = vi.dot(ni)*ni;
-			vit = vi - vin;
-			vi = -(restitutionCoef)*vin + (1 - frictionCoef) * vit;
-			pos.block_vector(i) = xi;
-			vel.block_vector(i) = vi;
-		}
-	}
-	/*printf("Collision resolution:\n");
-	std::cout << pos << std::endl;*/
 }
 
 void FEMSimObj::integrateImplicitProjection()
@@ -280,11 +233,16 @@ void FEMSimObj::integrateImplicitProjection()
 			// Collision Detection every iteration
 			collisionDectection(predPos);
 		}
-
+		if (staticAnalysisLog)
+			printf("\tLog GD: %d iteration\n", currIter);
 		converge = performGradientDescentOneIter(predPos);
+		ScalarType W = evalPotentialEnergy(predPos);
+
 		// if (converge) printf("converge\n");
+		
 	}
-	printf("converge iter: %d\n", currIter);
+	if(this->debug) printf("converge iter: %d\n", currIter);
+
 	// update constants
 	updatePosAndVel(predPos);
 }
@@ -306,11 +264,14 @@ void FEMSimObj::checkGradient(VectorX& pos, VectorX& gradient)
 
 		smallShiftX(i) = (energyAdd - energySub) / (2 * COLLISION_EPSILON);
 	}
-	printf("Check Gradient:\n");
-	std::cout << smallShiftX << std::endl;
-	printf("Eval Gradient:\n");
-	std::cout << gradient << std::endl;
-	divideTwoGradients(smallShiftX, gradient);
+	if (this->debug)
+	{
+		printf("Check Gradient:\n");
+		std::cout << smallShiftX << std::endl;
+		printf("Eval Gradient:\n");
+		std::cout << gradient << std::endl;
+		divideTwoGradients(smallShiftX, gradient);
+	}
 }
 
 void FEMSimObj::divideTwoGradients(VectorX& g1, VectorX& g2)
@@ -321,8 +282,11 @@ void FEMSimObj::divideTwoGradients(VectorX& g1, VectorX& g2)
 	{
 		div(i) = g1(i) / g2(i);   // correct / real
 	}
-	printf("Divide Gradients:\n");
-	std::cout << div << std::endl;
+	if (this->debug)
+	{
+		printf("Divide Gradients:\n");
+		std::cout << div << std::endl;
+	}
 }
 
 bool FEMSimObj::performGradientDescentOneIter(VectorX& pos)
@@ -341,6 +305,12 @@ bool FEMSimObj::performGradientDescentOneIter(VectorX& pos)
 
 	// update pos
 	pos = pos + descentDir * stepSize;
+	newEnergy = evalEnergy(pos);
+	if (staticAnalysisLog)
+	{
+		printf("\t\tLineSearch: find stepSize: %f; energy: %f (d_p: %f)\n", stepSize, newEnergy, newEnergy/prevEnergy);
+		prevEnergy = newEnergy;
+	}
 
 	// check convergence
 	if (stepSize < EPSILON)
@@ -353,14 +323,14 @@ bool FEMSimObj::performGradientDescentOneIter(VectorX& pos)
 void FEMSimObj::computeConstantVectorY()
 {
 	// implicit euler
-	y = mesh->currPos + mesh->currVel * h + h * h * mesh->invMassMat*externalForce;
+	y = mesh->currPos + mesh->currVel * deltaTime + deltaTime * deltaTime * mesh->invMassMat*externalForce;
 }
 
 void FEMSimObj::updatePosAndVel(const VectorX& newPos)
 {
 	mesh->prevVel = mesh->currVel;
 	mesh->prevPos = mesh->currPos;
-	mesh->currVel = (newPos - mesh->currPos) / h;
+	mesh->currVel = (newPos - mesh->currPos) / deltaTime;
 	mesh->currPos = newPos;
 	/*for (int i = 0; i < 12; ++i)
 	{
@@ -373,10 +343,10 @@ ScalarType FEMSimObj::evalEnergy(const VectorX& pos)
 {
 	ScalarType energyPureConstraints, rtnEnergy;
 	ScalarType inertia = 0.5 * (pos - y).transpose() * mesh->massMat * (pos - y);
-	ScalarType hSquare = h * h;
+	ScalarType dtSquare = deltaTime * deltaTime;
 
 	energyPureConstraints = evalEnergyPureConstraint(pos);
-	rtnEnergy = inertia + hSquare * energyPureConstraints;  // g(x)
+	rtnEnergy = inertia + deltaTime * energyPureConstraints;  // g(x)
 
 	return rtnEnergy;
 }
@@ -400,10 +370,10 @@ ScalarType FEMSimObj::evalEnergyPureConstraint(const VectorX& pos)
 
 void FEMSimObj::evalGradient(const VectorX& pos, VectorX& gradient)
 {
-	ScalarType hSquare = h * h;
+	ScalarType dtSquare = deltaTime * deltaTime;
 
 	evalGradientPureConstraint(pos, gradient);
-	gradient = mesh->massMat * (pos - y) + hSquare * gradient; // M*(x-y) + h^2*grad
+	gradient = mesh->massMat * (pos - y) + dtSquare * gradient; // M*(x-y) + h^2*grad
 }
 
 void FEMSimObj::evalGradientPureConstraint(const VectorX& pos, VectorX& gradient)
@@ -451,10 +421,12 @@ void FEMSimObj::evalGradientCollision(const VectorX& pos, VectorX& gradient)
 
 ScalarType FEMSimObj::lineSearch(const VectorX& pos, const VectorX& gradient, const VectorX& descentDir)
 {
-	VectorX newPos(mesh->systemDimension);
+	if (staticAnalysisLog)	printf("\t\tEntering Line Search\n");
+
+	lsNew.resize(mesh->systemDimension);
 	ScalarType attemptStepSize = 1.0 / lsBeta;
 	ScalarType lhs, rhs;
-
+	int lineSearchNum = 0;
 	ScalarType currObjectiveVal;
 	try
 	{
@@ -466,20 +438,27 @@ ScalarType FEMSimObj::lineSearch(const VectorX& pos, const VectorX& gradient, co
 	}
 	do
 	{
+		++lineSearchNum;
 		attemptStepSize *= lsBeta;
-		newPos = pos + attemptStepSize * descentDir;
+		lsNew = pos + attemptStepSize * descentDir;
 
 		lhs = 1e15;
 		rhs = 0;
 		try
 		{
-			lhs = evalEnergy(newPos);
+			lhs = evalEnergy(lsNew);
 		}
 		catch (const std::exception&)
 		{
 			continue;  // not a good candidate for step size
 		}
 		rhs = currObjectiveVal + lsAlpha * attemptStepSize * (gradient.transpose() * descentDir)(0);
+		
+		if (staticAnalysisLog)
+		{
+			printf("\t\t\tenergy: %f ==> attemptStepSize(%f)\n", lhs, attemptStepSize);
+		}
+		
 		if (lhs >= rhs)
 			continue;  // not a good candidate for step size
 		break; // exit line search looping
@@ -491,13 +470,16 @@ ScalarType FEMSimObj::lineSearch(const VectorX& pos, const VectorX& gradient, co
 		attemptStepSize = 0.0f;
 	}
 	lsStepSize = attemptStepSize;
+	
+	lhs = newEnergy;
 	return lsStepSize;
 }
 
 ScalarType FEMSimObj::evalPotentialEnergy(const VectorX& pos)
 {
 	ScalarType rtnEnergy = evalEnergyPureConstraint(pos);
-	rtnEnergy -= externalForce.dot(pos);
+	// printf("immediate rtnEnergy: %f\n", rtnEnergy);
+	if(!isFirstFrame) rtnEnergy -= externalForce.dot(pos);
 
 	return rtnEnergy;
 }
