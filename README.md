@@ -45,9 +45,9 @@ This program will output a series of "tet" files corresponding to each frame, wh
 
 ## Free Fall
 
-![Demo_GIF](Demo/FEM_Stvk.gif)
+https://youtu.be/y_G05t2z3v0
 
-(unit/point mass = 1.0f, mu = 5e4, lambda = 20e4)
+(unit/point mass = 0.01f, mu = 2e6, lambda = 8e6)
 
 ## Comparisons
 

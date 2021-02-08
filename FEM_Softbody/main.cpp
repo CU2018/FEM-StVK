@@ -29,9 +29,9 @@ unsigned int iterationNum = 200; // num of gradient descent iteration
 
 // material info
 MaterialType matType = MATERIAL_TYPE_StVK;
-ScalarType matMu = 5e4; // Lame's second param - resistance for shearing
-ScalarType matLambda = 20e4; // Lame's first param - resistance for change of volume
-ScalarType unitMass = 1.0f;
+ScalarType matMu = 2e6; // Lame's second param - resistance for shearing
+ScalarType matLambda = 8e6; // Lame's first param - resistance for change of volume
+ScalarType unitMass = 0.01f;
 
 TetMesh* gMesh;
 TetMesh* predMesh;
@@ -48,7 +48,7 @@ int main()
 {	
 	// load the mesh info from the file
 	gMesh = new TetMesh();
-	gMesh->init(staticRestFilePath, unitMass);
+	gMesh->init(pigHeadFilePath, unitMass);
 
 	if (enableStaticAnal)
 	{
